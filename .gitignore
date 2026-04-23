@@ -9,6 +9,17 @@ lerna-debug.log*
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
+# Geodaten — nicht in Git!
+data/
+*.shp
+*.dbf
+*.shx
+*.prj
+*.cpg
+*.qix
+*.sbn
+*.sbx
+
 # Runtime data
 pids
 *.pid

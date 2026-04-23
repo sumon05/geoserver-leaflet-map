@@ -1,0 +1,2 @@
+data/Karlsruhe/*.shp filter=lfs diff=lfs merge=lfs -text
+data/Karlsruhe/*.dbf filter=lfs diff=lfs merge=lfs -text
