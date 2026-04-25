@@ -1,0 +1,20 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - geoserver
+    environment:
+      - GEOSERVER_URL=http://geoserver:8080/geoserver
+
+  geoserver:
+    image: docker.osgeo.org/geoserver:2.24.4
+    ports:
+      - "8081:8080"
+    environment:
+      - GEOSERVER_ADMIN_USER=admin
+      - GEOSERVER_ADMIN_PASSWORD=geoserver
+    volumes:
+      - ./geoserver_data:/opt/geoserver/data_dir
+      - ./data/Karlsruhe:/opt/shapefiles

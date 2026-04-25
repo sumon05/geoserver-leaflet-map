@@ -3,19 +3,23 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const app = express();
 
-// Proxy to GeoServer
+// Lokal oder Docker
+const GEOSERVER_URL =
+  process.env.GEOSERVER_URL || "http://localhost:8080/geoserver";
+
+console.log("GeoServer URL:", GEOSERVER_URL);
+
 app.use(
   "/geoserver",
   createProxyMiddleware({
-    target: "http://localhost:8080/geoserver",
+    target: GEOSERVER_URL,
     changeOrigin: true,
     pathRewrite: {
-      "^/geoserver": "", // remove prefix before forwarding
+      "^/geoserver": "",
     },
   }),
 );
 
-// Serve your frontend
 app.use(express.static("."));
 
 app.listen(3000, () => {
