@@ -1,0 +1,22 @@
+<layer>
+  <name>roads_utf8</name>
+  <id>LayerInfoImpl--6bfb2e59:19dbe1cf8a3:-7fd0</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--6bfb2e59:19dbe1cf8a3:-7fcb</id>
+  </defaultStyle>
+  <styles class="linked-hash-set">
+    <style>
+      <id>StyleInfoImpl--570ae188:124761b8d78:-7fe3</id>
+    </style>
+  </styles>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--6bfb2e59:19dbe1cf8a3:-7fd1</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2026-04-24 09:36:07.375 UTC</dateCreated>
+  <dateModified>2026-04-24 18:31:18.138 UTC</dateModified>
+</layer>

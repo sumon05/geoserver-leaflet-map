@@ -1,0 +1,17 @@
+<layer>
+  <name>gis_osm_places_free_1</name>
+  <id>LayerInfoImpl--6bfb2e59:19dbe1cf8a3:-7fc5</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--6bfb2e59:19dbe1cf8a3:-7fc4</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--6bfb2e59:19dbe1cf8a3:-7fc6</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2026-04-24 10:18:20.96 UTC</dateCreated>
+  <dateModified>2026-04-24 18:30:51.96 UTC</dateModified>
+</layer>

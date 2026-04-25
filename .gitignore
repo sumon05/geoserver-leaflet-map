@@ -9,13 +9,27 @@ data/
 *.sbx
 *.qix
 
+# GeoServer Konfiguration
+geoserver_data/
+
 # Node
 node_modules/
 npm-debug.log*
+package-lock.json
+
+# Environment
 .env
+.env.*
+!.env.example
 
 # VS Code
 .vscode/
 
 # Logs
 *.log
+logs/
+
+# Build
+dist/
+out/
+.cache/
