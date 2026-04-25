@@ -1,13 +1,3 @@
-# Geodaten
-data/
-*.shp
-*.dbf
-*.shx
-*.prj
-*.cpg
-*.sbn
-*.sbx
-*.qix
 
 # GeoServer Konfiguration
 geoserver_data/
