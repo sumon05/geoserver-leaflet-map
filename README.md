@@ -89,8 +89,9 @@ docker-compose up
 ```
 
 Wait until both services are ready:
-geoserver-1 | Server startup in XXXX ms
-app-1 | Server running on http://localhost:3000
+
+- geoserver-1 | Server startup in XXXXX... ms
+- app-1 | Server running on http://localhost:3000
 
 ### Step 4 — Run Setup Script
 
@@ -105,16 +106,15 @@ This script automatically:
 - Creates the `karlsruhe` workspace in GeoServer
 - Creates all 4 datastores pointing to the Shapefiles
 - Publishes all 4 layers with EPSG:4326
-- Assigns styles to each layer
-
-Expected output:
-Warte auf GeoServer...
-Erstelle Workspace...
-Erstelle Stores...
-Erstelle Layer...
-Setup abgeschlossen!
-Karte: http://localhost:3000
-GeoServer: http://localhost:8081/geoserver
+- Assigns styles to each layer<br/>
+  Expected output: <br/>
+  Warte auf GeoServer... <br/>
+  Erstelle Workspace... <br/>
+  Erstelle Stores...<br/>
+  Erstelle Layer...<br/>
+  Setup abgeschlossen! <br/>
+  Karte: http://localhost:3000<br/>
+  GeoServer: http://localhost:8081/geoserver<br/>
 
 ### Step 5 — Open the Map
 
@@ -122,24 +122,24 @@ http://localhost:3000
 
 ## GeoServer Admin Panel
 
-URL: http://localhost:8081/geoserver
+URL: http://localhost:8081/geoserver<br/>
 Username: admin Password: geoserver
 
 ## Architecture
 
-Browser (localhost:3000)
-↓
-Express Server (server.js) ← CORS Proxy
-↓
-GeoServer (localhost:8081) ← WMS/WFS
-↓
-Shapefiles (/opt/shapefiles) ← Geodaten
+Browser (localhost:3000)<br/>
+↓<br/>
+Express Server (server.js) ← CORS Proxy<br/>
+↓<br/>
+GeoServer (localhost:8081) ← WMS/WFS<br/>
+↓<br/>
+Shapefiles (/opt/shapefiles) ← Geodaten<br/>
 
 ## Screenshots
 
 ### Map with Popup
 
-![Map View](screenshots/map.png)
+![Map View](screenshots/map_popup.png)
 
 ## Troubleshooting
 
