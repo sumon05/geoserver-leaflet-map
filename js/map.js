@@ -1,7 +1,6 @@
 // ── Karte initialisieren ──────────────────────────
 const map = L.map("map").setView([49.0069, 8.4037], 13);
 
-// const GS = "http://localhost:8080/geoserver/karlsruhe/wms";
 const GS = "/geoserver/wms";
 
 // ── Basemaps ──────────────────────────────────────
@@ -21,9 +20,9 @@ const strassen = L.tileLayer
     layers: "karlsruhe:roads_utf8",
     format: "image/png",
     transparent: true,
-    interactive: false,
     version: "1.1.1",
     crs: L.CRS.EPSG3857,
+    minZoom: 13,
   })
   .addTo(map);
 
@@ -32,7 +31,6 @@ const gewaesser = L.tileLayer
     layers: "karlsruhe:gis_osm_water_a_free_1",
     format: "image/png",
     transparent: true,
-    interactive: false,
     version: "1.1.1",
     crs: L.CRS.EPSG3857,
   })
@@ -42,9 +40,9 @@ const gebaeude = L.tileLayer.wms(GS, {
   layers: "karlsruhe:buildings_utf8",
   format: "image/png",
   transparent: true,
-  interactive: false,
   version: "1.1.1",
   crs: L.CRS.EPSG3857,
+  minZoom: 15,
 });
 
 const orte = L.tileLayer
@@ -52,7 +50,6 @@ const orte = L.tileLayer
     layers: "karlsruhe:gis_osm_places_free_1",
     format: "image/png",
     transparent: true,
-    interactive: false,
     version: "1.1.1",
     crs: L.CRS.EPSG3857,
   })
@@ -86,34 +83,40 @@ L.control
 // ── Massstab ──────────────────────────────────────
 L.control.scale({ imperial: false }).addTo(map);
 
+// ── Highlight Layer ───────────────────────────────
+let highlightLayer;
+
 // ── Klick → ALLE sichtbaren Layer abfragen ────────
 map.on("click", async (e) => {
-  // Welche Layer sind gerade AN?
   const visibleLayers = Object.keys(activeLayers).filter((layerName) =>
     map.hasLayer(activeLayers[layerName]),
   );
 
   if (visibleLayers.length === 0) return;
 
-  // Alle sichtbaren Layer abfragen
+  clearHighlight();
+
   let allFeatures = [];
 
   for (const layerName of visibleLayers) {
     const feature = await getFeatureInfo(e, layerName);
-
     if (feature) {
-      allFeatures.push({ layer: layerName, props: feature.properties });
-
-      highlightFeature(feature); // highlight last found
+      allFeatures.push({
+        layer: layerName,
+        props: feature.properties,
+        feature,
+      });
     }
   }
 
   if (allFeatures.length === 0) {
     map.closePopup();
-    clearHighlight();
     resetInfoPanel();
     return;
   }
+
+  // Erstes Feature highlighten
+  highlightFeature(allFeatures[0].feature);
 
   // Popup Inhalt aufbauen
   let content = "";
@@ -125,15 +128,13 @@ map.on("click", async (e) => {
         <div class="popup-section">
           <div class="popup-title">🛣️ Strasse</div>
           <div class="popup-row">
-            <span>Name:</span>
-            ${props.name || "Unbekannt"}
+            <span>Name:</span> ${props.name || "Unbekannt"}
           </div>
           <div class="popup-row">
             <span>Typ:</span> ${props.fclass || "-"}
           </div>
           <div class="popup-row">
-            <span>Max. Tempo:</span>
-            ${props.maxspeed || "-"} km/h
+            <span>Max. Tempo:</span> ${props.maxspeed || "-"} km/h
           </div>
           <div class="popup-row">
             <span>Einbahn:</span>
@@ -148,8 +149,7 @@ map.on("click", async (e) => {
         <div class="popup-section">
           <div class="popup-title">💧 Gewaesser</div>
           <div class="popup-row">
-            <span>Name:</span>
-            ${props.name || "Unbekannt"}
+            <span>Name:</span> ${props.name || "Unbekannt"}
           </div>
           <div class="popup-row">
             <span>Typ:</span> ${props.fclass || "-"}
@@ -163,8 +163,7 @@ map.on("click", async (e) => {
         <div class="popup-section">
           <div class="popup-title">🏢 Gebaeude</div>
           <div class="popup-row">
-            <span>Name:</span>
-            ${props.name || "Unbekannt"}
+            <span>Name:</span> ${props.name || "Unbekannt"}
           </div>
           <div class="popup-row">
             <span>Typ:</span> ${props.type || "-"}
@@ -178,8 +177,7 @@ map.on("click", async (e) => {
         <div class="popup-section">
           <div class="popup-title">📍 Ort</div>
           <div class="popup-row">
-            <span>Name:</span>
-            ${props.name || "Unbekannt"}
+            <span>Name:</span> ${props.name || "Unbekannt"}
           </div>
           <div class="popup-row">
             <span>Typ:</span> ${props.fclass || "-"}
@@ -207,21 +205,9 @@ map.on("click", async (e) => {
     allFeatures[0].props.name || "Element",
     `<p>Typ: ${allFeatures[0].props.fclass || "-"}</p>`,
   );
-  let highlighted = false;
-
-  for (const layerName of visibleLayers) {
-    const feature = await getFeatureInfo(e, layerName);
-
-    if (feature) {
-      allFeatures.push({ layer: layerName, props: feature.properties });
-
-      if (!highlighted) {
-        highlightFeature(feature);
-        highlighted = true;
-      }
-    }
-  }
 });
+
+// Popup schliessen → Highlight entfernen
 map.on("popupclose", () => {
   clearHighlight();
   resetInfoPanel();
@@ -254,13 +240,16 @@ async function getFeatureInfo(e, layerName) {
 
   try {
     const url = `${GS}?${params}`;
-    console.log("GFI URL:", url); // 🔍 debug
-
     const res = await fetch(url);
-    const data = await res.json();
+    const text = await res.text();
 
-    console.log("GFI response:", data); // 🔍 debug
+    // XML Fehler abfangen
+    if (text.startsWith("<?xml") || text.startsWith("<")) {
+      console.warn("GeoServer returned XML:", text);
+      return null;
+    }
 
+    const data = JSON.parse(text);
     return data.features?.[0] || null;
   } catch (err) {
     console.error("Fehler:", err);
@@ -268,62 +257,7 @@ async function getFeatureInfo(e, layerName) {
   }
 }
 
-// ── Info Panel ────────────────────────────────────
-function updateInfoPanel(title, content) {
-  document.getElementById("info-panel").innerHTML = `
-    <h3>${title}</h3>
-    ${content || "<p>Keine Daten</p>"}
-  `;
-}
-
-/* WFS */
-let highlightLayer;
-async function getFeatureGeometry(e, layerName) {
-  const point = map.latLngToContainerPoint(e.latlng);
-  const size = map.getSize();
-  const bounds = map.getBounds();
-
-  const sw = map.options.crs.project(bounds.getSouthWest());
-  const ne = map.options.crs.project(bounds.getNorthEast());
-
-  const params = new URLSearchParams({
-    service: "WFS",
-    version: "1.1.0",
-    request: "GetFeature",
-    typeName: layerName,
-    outputFormat: "application/json",
-    srsName: "EPSG:3857",
-    bbox: `${sw.x},${sw.y},${ne.x},${ne.y},EPSG:3857`,
-  });
-
-  const url = `${GS.replace("/wms", "/wfs")}?${params}`;
-  const res = await fetch(url);
-  const data = await res.json();
-
-  return data.features || [];
-}
-// Get closest feature geometry and highlight it
-function getClosestFeature(features, clickLatLng) {
-  let minDist = Infinity;
-  let closest = null;
-
-  features.forEach((f) => {
-    const coords = f.geometry.coordinates;
-
-    // Handle Point only (for now)
-    if (f.geometry.type === "Point") {
-      const latlng = L.latLng(coords[1], coords[0]);
-      const dist = latlng.distanceTo(clickLatLng);
-
-      if (dist < minDist) {
-        minDist = dist;
-        closest = f;
-      }
-    }
-  });
-
-  return closest;
-}
+// ── Highlight Funktion ────────────────────────────
 function highlightFeature(feature) {
   if (highlightLayer) {
     map.removeLayer(highlightLayer);
@@ -343,6 +277,14 @@ function highlightFeature(feature) {
         fillOpacity: 0.8,
       }),
   }).addTo(map);
+}
+
+// ── Info Panel ────────────────────────────────────
+function updateInfoPanel(title, content) {
+  document.getElementById("info-panel").innerHTML = `
+    <h3>${title}</h3>
+    ${content || "<p>Keine Daten</p>"}
+  `;
 }
 
 function resetInfoPanel() {
