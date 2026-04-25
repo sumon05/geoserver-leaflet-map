@@ -37,7 +37,7 @@ the spatial backend and Leaflet.js as the frontend framework.
 
 ## Project Structure
 
-geoserver-leaflet-map/
+```geoserver-leaflet-map/
 ├── css/
 │ └── style.css # Map styling
 ├── js/
@@ -52,7 +52,7 @@ geoserver-leaflet-map/
 ├── server.js # Express proxy server
 ├── index.html # Main HTML file
 └── README.md
-
+```
 ## Quick Start
 
 ### Prerequisites
